@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>数学题生成器</title>
+    <style>
+        #generateButton {
+            width: 200px;
+            margin: 10px;
+            font-size: large;
+            padding: 10px;
+        }
+        #displayAnswer {
+            font-size: small;
+        }
+        .answer {
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+    <body>
+        <h2>数学题生成器</h2>
+        <div>
+            <label for="numberOfQuestions">题目数量</label>
+            <input id="numberOfQuestions" type="text" value="10">
+        </div>
+        <div>
+            <label for="maxResult">得数范围</label>
+            <input id="maxResult" type="text" value="100">
+        </div>
+        <div>
+            <label for="includePlus">加法</label>
+            <input id="includePlus" type="checkbox" checked>
+        </div>
+        <div>
+            <label for="includeMinus">减法</label>
+            <input id="includeMinus" type="checkbox" checked>
+        </div>
+        <button id="generateButton" onclick="generate()">生成题目</button>
+        <hr />
+        <h3>
+            题目列表
+            <button id="toggleAnswer" onclick="toggleAnswer()">显示/隐藏答案</button>
+        </h3>
+        <ul id="questionList">
+
+        </ul>
+    </body>
+    <script>
+        var displayAnswer = false;
+
+        function padLeft(str, num) {
+            var ret = str.toString();
+            if (ret.length < num) {
+                return " ".repeat(num - ret.length) + ret;
+            }
+
+            return ret;
+        }
+
+        function toggleAnswer() {
+            displayAnswer = !displayAnswer;
+            var elements = document.getElementsByClassName("answer");
+            for (var i = 0; i < elements.length; i++) {
+                if (displayAnswer) {
+                    elements[i].classList.remove("hidden");
+                } else {
+                    elements[i].classList.add("hidden");
+                }
+            }
+        }
+
+        function generate() {
+            var numberOfQuestions = parseInt(document.getElementById("numberOfQuestions").value);
+            var maxResult = parseInt(document.getElementById("maxResult").value);
+            var includePlus = document.getElementById("includePlus").checked;
+            var includeMinus = document.getElementById("includeMinus").checked;
+            var questions = [];
+            while (questions.length < numberOfQuestions) {
+                var number1 = Math.floor(Math.random() * maxResult);
+                var number2 = Math.floor(Math.random() * maxResult);
+                var isMinus = false;
+                if (includeMinus && !includePlus) {
+                    isMinus = true;
+                } else if (includeMinus && includePlus) {
+                    isMinus = Math.random() < 0.5 ? true : false;
+                }
+                if (isMinus) {
+                    var left = Math.max(number1, number2);
+                    var right = Math.min(number1, number2);
+                    if (left - right >= 0 && left - right < maxResult) {
+                        questions.push([left, true, right]);
+                    }
+                } else {
+                    if (number1 + number2 < maxResult) {
+                        questions.push([number1, false, number2]);
+                    } else continue;
+                }
+            }
+
+            var html = "";
+            for (var i = 0; i < questions.length; i++) {
+                var line = "<li><pre>" + padLeft(questions[i][0], 2) + (questions[i][1] ? " - " : " + ") + padLeft(questions[i][2], 2) + " = ";
+                line += '<span class="answer hidden">' + (questions[i][1] ? questions[i][0] - questions[i][2] : questions[i][0] + questions[i][2]) + '</span>';
+                line += "</pre></li>\n";
+                html += line;
+            }
+
+            var list = document.getElementById("questionList");
+            list.innerHTML = html;
+        }
+    </script>
+</html>
